@@ -98,128 +98,105 @@ const itemVariants = {
 export default function DashboardPage() {
   const { filteredClaims, claims, isLoading } = useData();
 
-  if (isLoading) return null;
-
-  if (claims.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center h-screen gap-2">
-        <p className="text-lg font-bold text-foreground">No data found</p>
-        <p className="text-sm text-muted-foreground">
-          Make sure claims.xlsx is placed in the public folder.
-        </p>
-      </div>
-    );
-  }
-
   // Calculate KPIs
   const totalClaims = filteredClaims.length;
-  const arbLopNoOonCount = filteredClaims.filter((c) => {
-    const s = String(c.claimStatus || "")
-      .toLowerCase()
-      .trim();
-    // Exclude claims whose status explicitly places them in another category
-    if (
-      s.includes("paid correctly") ||
-      s.includes("paid with 50%") ||
-      s.includes("paid with patient")
-    )
-      return false;
-    if (
-      s.includes("towards dedcutible") ||
-      s.includes("towards deductible") ||
-      s.includes("self pay")
-    )
-      return false;
-    if (s.includes("in process") || s.includes("pending")) return false;
 
-    // ARB / LOP / No OON / Benefit Exhausted logic
-    return (
-      s.includes("under arbitration") ||
-      s.includes("benefit exhausted") ||
-      s.includes("denied-no oon") ||
-      s.includes("denied - no oon") ||
-      s.includes("no oon") ||
-      s === "lop" ||
-      s.includes("/lop") ||
-      String(c.insuranceType || "").toUpperCase() === "LOP" ||
-      c.arbFlag
-    );
-  }).length;
-  const deductibleCount = filteredClaims.filter((c) => {
-    const status = String(c.claimStatus || "").toLowerCase();
-    return (
-      status.includes("towards deductible") ||
-      status.includes("towards dedcutible") ||
-      status.includes("deductible")
-    );
-  }).length;
-  const selfPayCount = filteredClaims.filter((c) => {
-    const status = String(c.claimStatus || "").toLowerCase();
-    const payStatus = String(c.paymentStatus || "").toLowerCase();
-    return (
-      status.includes("self pay") ||
-      status.includes("selfpay") ||
-      payStatus.includes("selfpay")
-    );
-  }).length;
-  const paidCount = filteredClaims.filter((c) => {
-    const s = String(c.claimStatus || "")
-      .toLowerCase()
-      .trim();
-    return (
-      s.includes("paid correctly") ||
-      s.includes("paid with 50%") ||
-      s.includes("paid with patient")
-    );
-  }).length;
+  const arbLopNoOonCount = useMemo(
+    () =>
+      filteredClaims.filter((c) => {
+        const s = String(c.claimStatus || "")
+          .toLowerCase()
+          .trim();
+        if (
+          s.includes("paid correctly") ||
+          s.includes("paid with 50%") ||
+          s.includes("paid with patient")
+        )
+          return false;
+        if (
+          s.includes("towards dedcutible") ||
+          s.includes("towards deductible") ||
+          s.includes("self pay")
+        )
+          return false;
+        if (s.includes("in process") || s.includes("pending")) return false;
+        return (
+          s.includes("under arbitration") ||
+          s.includes("benefit exhausted") ||
+          s.includes("denied-no oon") ||
+          s.includes("denied - no oon") ||
+          s.includes("no oon") ||
+          s === "lop" ||
+          s.includes("/lop") ||
+          String(c.insuranceType || "").toUpperCase() === "LOP" ||
+          c.arbFlag
+        );
+      }).length,
+    [filteredClaims],
+  );
+
+  const paidCount = useMemo(
+    () =>
+      filteredClaims.filter((c) => {
+        const s = String(c.claimStatus || "")
+          .toLowerCase()
+          .trim();
+        return (
+          s.includes("paid correctly") ||
+          s.includes("paid with 50%") ||
+          s.includes("paid with patient")
+        );
+      }).length,
+    [filteredClaims],
+  );
+
   const unpaidCount = totalClaims - paidCount - arbLopNoOonCount;
 
   // Generate Monthly Claims Data (DOS)
-  const monthMap: Record<string, number> = {};
-  filteredClaims.forEach((c) => {
-    if (c.serviceDate) {
-      const d = new Date(c.serviceDate);
-      if (!isNaN(d.getTime())) {
-        const sortKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-        monthMap[sortKey] = (monthMap[sortKey] || 0) + 1;
+  const monthlyData = useMemo(() => {
+    const monthMap: Record<string, number> = {};
+    filteredClaims.forEach((c) => {
+      if (c.serviceDate) {
+        const d = new Date(c.serviceDate);
+        if (!isNaN(d.getTime())) {
+          const sortKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+          monthMap[sortKey] = (monthMap[sortKey] || 0) + 1;
+        }
+      }
+    });
+
+    const result: Array<{
+      sortKey: string;
+      name: string;
+      shortName: string;
+      value: number;
+    }> = [];
+
+    const sortKeys = Object.keys(monthMap).sort();
+    if (sortKeys.length > 0) {
+      const minKey = sortKeys[0];
+      const maxKey = sortKeys[sortKeys.length - 1];
+      let [currY, currM] = minKey.split("-").map(Number);
+      const [maxY, maxM] = maxKey.split("-").map(Number);
+
+      while (currY < maxY || (currY === maxY && currM <= maxM)) {
+        const key = `${currY}-${String(currM).padStart(2, "0")}`;
+        const d = new Date(currY, currM - 1, 1);
+        result.push({
+          sortKey: key,
+          name: d.toLocaleString("default", { month: "long" }),
+          shortName: d.toLocaleString("default", { month: "short" }),
+          value: monthMap[key] || 0,
+        });
+        currM++;
+        if (currM > 12) {
+          currM = 1;
+          currY++;
+        }
       }
     }
-  });
-
-  // Support filling gaps between min/max months
-  let monthlyData: Array<{
-    sortKey: string;
-    name: string;
-    shortName: string;
-    value: number;
-  }> = [];
-
-  const sortKeys = Object.keys(monthMap).sort();
-  if (sortKeys.length > 0) {
-    const minKey = sortKeys[0];
-    const maxKey = sortKeys[sortKeys.length - 1];
-
-    let [currY, currM] = minKey.split("-").map(Number);
-    const [maxY, maxM] = maxKey.split("-").map(Number);
-
-    while (currY < maxY || (currY === maxY && currM <= maxM)) {
-      const key = `${currY}-${String(currM).padStart(2, "0")}`;
-      const d = new Date(currY, currM - 1, 1);
-
-      monthlyData.push({
-        sortKey: key,
-        name: d.toLocaleString("default", { month: "long" }),
-        shortName: d.toLocaleString("default", { month: "short" }),
-        value: monthMap[key] || 0,
-      });
-
-      currM++;
-      if (currM > 12) {
-        currM = 1;
-        currY++;
-      }
-    }
-  }
+    return result;
+  }, [filteredClaims]);
 
   // Determine the display year/range for the title
   const dateRangeTitle = useMemo(() => {
@@ -239,6 +216,20 @@ export default function DashboardPage() {
     const topFive = sorted.slice(0, 5);
     return { peak, avg, topFive, max: peak ? peak.value : 0 };
   }, [monthlyData]);
+
+  // Early returns AFTER all hooks
+  if (isLoading) return null;
+
+  if (claims.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen gap-2">
+        <p className="text-lg font-bold text-foreground">No data found</p>
+        <p className="text-sm text-muted-foreground">
+          Make sure claims.xlsx is placed in the public folder.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
