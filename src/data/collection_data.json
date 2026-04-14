@@ -1,0 +1,152 @@
+[
+  {
+    "__EMPTY": "Apr-25",
+    "Bruce J Buckman,DPT": 1550.25,
+    "Peter J Berger,DC": 1295.74
+  },
+  {
+    "__EMPTY": "May-25",
+    "Bruce J Buckman,DPT": 4370.91,
+    "Peter J Berger,DC": 8487.53,
+    "Madison Smith": 2444.26,
+    "Christian Gartner": 105,
+    "Jay Brecker": 3687.13,
+    "Monroe Castro": 936.4
+  },
+  {
+    "__EMPTY": "Jun-25",
+    "Bruce J Buckman,DPT": 11158.83,
+    "Peter J Berger,DC": 18683.75,
+    "Madison Smith": 5046.62,
+    "Christian Gartner": 2574.37,
+    "Jay Brecker": 21009.59,
+    "Monroe Castro": 9663.050000000001,
+    "BILLY FORD,MD": 276.15000000000003,
+    "DAVID ADIN,DO - PAIN MGMT": 1263.19
+  },
+  {
+    "__EMPTY": "Jul-25",
+    "Bruce J Buckman,DPT": 8359.880000000001,
+    "Peter J Berger,DC": 12352.970000000001,
+    "Madison Smith": 2030.8700000000001,
+    "Christian Gartner": 4555.87,
+    "Jay Brecker": 7403.18,
+    "Monroe Castro": 3802.37,
+    "BILLY FORD,MD": 2674.29,
+    "DAVID ADIN,DO - PAIN MGMT": 4306.6900000000005
+  },
+  {
+    "__EMPTY": "Aug-25",
+    "Bruce J Buckman,DPT": 8846.460000000001,
+    "Peter J Berger,DC": 22488.27,
+    "Madison Smith": 5131.66,
+    "Christian Gartner": 5679.63,
+    "Jay Brecker": 14401.4,
+    "Monroe Castro": 5627.16,
+    "BILLY FORD,MD": 393.94,
+    "DAVID ADIN,DO - PAIN MGMT": 9099.08
+  },
+  {
+    "__EMPTY": "Sep-25",
+    "Bruce J Buckman,DPT": 15370.32,
+    "Peter J Berger,DC": 18796.64,
+    "Madison Smith": 5113.66,
+    "Christian Gartner": 3830.98,
+    "Jay Brecker": 19031.68,
+    "Monroe Castro": 7927.4800000000005,
+    "BILLY FORD,MD": 252.38,
+    "SRIDHAR YALAMANCHILI,PT": 81.8,
+    "DAVID ADIN,DO - PAIN MGMT": 14973.720000000001
+  },
+  {
+    "__EMPTY": "Oct-25",
+    "Bruce J Buckman,DPT": 21348.54,
+    "Peter J Berger,DC": 29242.23,
+    "Madison Smith": 17825.93,
+    "Christian Gartner": 5851.06,
+    "Jay Brecker": 19771.96,
+    "Monroe Castro": 3787.46,
+    "SRIDHAR YALAMANCHILI,PT": 1603.32,
+    "ANDY KOSER,PT": 422.74,
+    "DAVID ADIN,DO - PAIN MGMT": 31958.58
+  },
+  {
+    "__EMPTY": "Nov-25",
+    "Bruce J Buckman,DPT": 17387.61,
+    "Peter J Berger,DC": 23613.53,
+    "Madison Smith": 8245.92,
+    "Christian Gartner": 15198.7,
+    "Jay Brecker": 20056.03,
+    "Monroe Castro": 7866.97,
+    "BILLY FORD,MD": 125.71000000000001,
+    "SRIDHAR YALAMANCHILI,PT": 2115.18,
+    "DAVID ADIN,DO - PAIN MGMT": 34051.89
+  },
+  {
+    "__EMPTY": "Dec-25",
+    "Bruce J Buckman,DPT": 15883.82,
+    "Peter J Berger,DC": 39846.57,
+    "Madison Smith": 5684.91,
+    "Christian Gartner": 15335.36,
+    "Jay Brecker": 35492.97,
+    "Monroe Castro": 11864.61,
+    "BILLY FORD,MD": 0,
+    "SRIDHAR YALAMANCHILI,PT": 1848.99,
+    "DAVID ADIN,DO - PAIN MGMT": 38196.78
+  },
+  {
+    "__EMPTY": "Jan-26",
+    "Bruce J Buckman,DPT": 22515.95,
+    "Peter J Berger,DC": 59622.54,
+    "Madison Smith": 15265.29,
+    "Christian Gartner": 21485.34,
+    "Jay Brecker": 35007.57,
+    "Monroe Castro": 12494.300000000001,
+    "SRIDHAR YALAMANCHILI,PT": 485.54,
+    "ANDY KOSER,PT": 1712.68,
+    "DAVID ADIN,DO - PAIN MGMT": 30001.16
+  },
+  {
+    "__EMPTY": "Feb-26",
+    "Bruce J Buckman,DPT": 11004.84,
+    "Peter J Berger,DC": 35947.33,
+    "Madison Smith": 10800.15,
+    "Christian Gartner": 17917.4,
+    "Jay Brecker": 16928.010000000002,
+    "Monroe Castro": 12098.460000000001,
+    "SRIDHAR YALAMANCHILI,PT": 66.09,
+    "ANDY KOSER,PT": 611.9300000000001,
+    "MARIANNE DECASTRO,PT": 260.3,
+    "DAVID ADIN,DO - PAIN MGMT": 47926.1
+  },
+  {
+    "__EMPTY": "Mar 2026",
+    "Bruce J Buckman,DPT": 39827.92,
+    "Peter J Berger,DC": 62470.200000000004,
+    "Madison Smith": 12365.18,
+    "Christian Gartner": 18861.96,
+    "Jay Brecker": 21627.06,
+    "Monroe Castro": 10360.97,
+    "SRIDHAR YALAMANCHILI,PT": 313.98,
+    "ANDY KOSER,PT": 210.28,
+    "MARIANNE DECASTRO,PT": 145.38,
+    "DAVID ADIN,DO - PAIN MGMT": 34909.340000000004
+  },
+  {
+    "__EMPTY": "Apr-26"
+  },
+  {
+    "__EMPTY": "Total",
+    "Bruce J Buckman,DPT": 177625.33000000002,
+    "Peter J Berger,DC": 332847.3,
+    "Madison Smith": 89954.45,
+    "Christian Gartner": 111395.67,
+    "Jay Brecker": 214416.58000000002,
+    "Monroe Castro": 86429.23,
+    "BILLY FORD,MD": 3722.4700000000003,
+    "SRIDHAR YALAMANCHILI,PT": 6514.900000000001,
+    "ANDY KOSER,PT": 2957.63,
+    "MARIANNE DECASTRO,PT": 405.68,
+    "DAVID ADIN,DO - PAIN MGMT": 246686.53
+  }
+]
