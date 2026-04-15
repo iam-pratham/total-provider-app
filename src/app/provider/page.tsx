@@ -25,6 +25,7 @@ import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
+  ChartConfig,
 } from "@/components/ui/chart";
 
 import {
@@ -59,20 +60,12 @@ const parseDateSafe = (dateStr: any) => {
   return new Date(dateStr);
 };
 
-const SPECIALTY_COLORS: Record<string, string> = {
-  Chiro: "var(--color-chart-1)",
-  PT: "var(--color-chart-2)",
-  OT: "var(--color-chart-4)",
-  "Pain Mgmt": "var(--color-chart-5)",
-};
-
-const CHART_COLORS = [
-  "var(--color-chart-1)",
-  "var(--color-chart-2)",
-  "var(--color-chart-3)",
-  "var(--color-chart-4)",
-  "var(--color-chart-5)",
-];
+const volumeConfig = {
+  claims: {
+    label: "Total Claims",
+    color: "var(--color-primary)",
+  },
+} satisfies ChartConfig;
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -144,9 +137,9 @@ export default function ProviderPage() {
   // --- Collection total logic (mirrors Collection tab) ---
   const providersFromClaims = useMemo(() => {
     let validClaims = cleanedClaims;
-    if (filters.provider)
-      validClaims = validClaims.filter(
-        (c) => c.doctorName === filters.provider,
+    if (filters.provider.length > 0)
+      validClaims = validClaims.filter((c) =>
+        filters.provider.includes(c.doctorName),
       );
     if (filters.doctor)
       validClaims = validClaims.filter((c) => c.doctorName === filters.doctor);
@@ -265,7 +258,6 @@ export default function ProviderPage() {
       pMap[name] = (pMap[name] || 0) + 1;
       tBilled += c.billedAmt || 0;
       tPaid += c.paidAmt || 0;
-      // Categorization helpers (Exact sync with Reports/Insights logic)
       const isPaidStatus =
         statusStr.includes("paid correctly") ||
         statusStr.includes("paid with 50%") ||
@@ -277,10 +269,8 @@ export default function ProviderPage() {
       const isInProcess =
         statusStr.includes("in process") || statusStr.includes("pending");
 
-      // Count Paid Claims
       if (isPaidStatus) tPaidClaims++;
 
-      // Count ARB / LOP / No OON seperately using exact Reports logic
       const isArbMatch =
         statusStr.includes("under arbitration") ||
         statusStr.includes("pip-geico") ||
@@ -292,7 +282,6 @@ export default function ProviderPage() {
         !statusStr.includes("benefit exhausted") &&
         !statusStr.includes("no oon benefit");
 
-      // Sync exactly with ONLY the 2 specific "No OON" buckets from Insights
       const isNoOonMatch =
         (statusStr.includes("no oon benefit") && statusStr.includes("lop")) ||
         (statusStr.includes("no oon benefit") &&
@@ -301,7 +290,6 @@ export default function ProviderPage() {
       if (isLopMatch) tLop++;
       if (isNoOonMatch) tNoOon++;
 
-      // Categorization based on pre-processed suffixes in data context
       const isChiro = name.includes(" - Chiro");
       const isPT = name.includes(" - PT");
       const isOT = name.includes(" - OT");
@@ -418,106 +406,87 @@ export default function ProviderPage() {
       >
         <motion.div variants={itemVariants} className="h-full">
           <Card className="flex flex-col h-full">
-            <CardHeader className="pb-4">
-              <CardTitle>Claims by Provider</CardTitle>
-              <p className="text-xs text-muted-foreground mt-1">
-                Top {Math.min(providerData.length, 10)} providers ranked by
-                volume
-              </p>
+            <CardHeader>
+              <CardTitle>Total Claims by Provider</CardTitle>
             </CardHeader>
-            <CardContent className="flex-1 overflow-y-auto px-5 pb-5">
-              <div className="space-y-3">
-                {providerData.slice(0, 10).map((entry, index) => {
-                  const pct = (entry.claims / filteredClaims.length) * 100 || 0;
-                  const maxClaims = providerData[0]?.claims || 1;
-                  const barPct = Math.round((entry.claims / maxClaims) * 100);
-                  const specialty = entry.name.includes(" - Chiro")
-                    ? "Chiro"
-                    : entry.name.includes(" - PT")
-                      ? "PT"
-                      : entry.name.includes(" - OT")
-                        ? "OT"
-                        : entry.name.includes(" - Pain Mgmt") ||
-                            entry.name.includes(" - PM")
-                          ? "Pain Mgmt"
-                          : null;
-                  const cleanName = entry.name.split(" - ")[0];
-                  const barColor = CHART_COLORS[index % CHART_COLORS.length];
-                  const specialtyColor = specialty
-                    ? SPECIALTY_COLORS[specialty]
-                    : undefined;
-
-                  return (
-                    <motion.div
-                      key={entry.name}
-                      initial={{ opacity: 0, x: -12 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{
-                        duration: 0.35,
-                        delay: index * 0.05,
-                        ease: "easeOut",
+            <CardContent className="flex-1 pb-4 w-full h-full">
+              <ChartContainer
+                config={volumeConfig}
+                className="min-h-[400px] w-full h-full"
+              >
+                <BarChart
+                  accessibilityLayer
+                  data={providerData.slice(0, 10)}
+                  layout="vertical"
+                  margin={{ top: 5, right: 120, left: 0, bottom: 5 }}
+                >
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    horizontal={true}
+                    vertical={false}
+                    strokeOpacity={0.2}
+                  />
+                  <XAxis
+                    type="number"
+                    domain={[
+                      0,
+                      (dataMax: number) =>
+                        dataMax === 0 ? 1 : Math.ceil(dataMax * 1.3),
+                    ]}
+                    tickLine={false}
+                    axisLine={false}
+                    tickMargin={10}
+                    style={{ fill: "var(--color-muted-foreground)" }}
+                  />
+                  <YAxis
+                    type="category"
+                    dataKey="name"
+                    width={140}
+                    tickLine={false}
+                    axisLine={false}
+                    style={{
+                      fontSize: "11px",
+                      fill: "var(--color-muted-foreground)",
+                    }}
+                  />
+                  <ChartTooltip
+                    cursor={{ fill: "var(--color-primary)", opacity: 0.1 }}
+                    content={<ChartTooltipContent indicator="line" />}
+                  />
+                  <Bar dataKey="claims" radius={[0, 4, 4, 0]} maxBarSize={40}>
+                    {providerData.slice(0, 10).map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={`var(--color-chart-${(index % 5) + 1})`}
+                      />
+                    ))}
+                    <LabelList
+                      dataKey="claims"
+                      position="right"
+                      content={(props: any) => {
+                        const { x, y, width, height, value } = props;
+                        if (value == null) return null;
+                        const pct = (
+                          (value / filteredClaims.length) * 100 || 0
+                        ).toFixed(1);
+                        const rx = (x as number) + (width as number) + 10;
+                        const ry = (y as number) + (height as number) / 2 + 4;
+                        return (
+                          <text x={rx} y={ry} fontSize={11}>
+                            <tspan fill="#dc2626" fontWeight={700}>
+                              {(value as number).toLocaleString()}
+                            </tspan>
+                            <tspan
+                              fill="var(--color-muted-foreground)"
+                              dx={8}
+                            >{`(${pct}%)`}</tspan>
+                          </text>
+                        );
                       }}
-                    >
-                      {/* Row header */}
-                      <div className="flex items-center gap-3 mb-1.5">
-                        {/* Rank badge */}
-                        <div
-                          className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black shrink-0 text-white"
-                          style={{ backgroundColor: barColor }}
-                        >
-                          {index + 1}
-                        </div>
-
-                        {/* Name + specialty */}
-                        <div className="flex-1 min-w-0 flex items-center gap-2">
-                          <span className="text-xs font-semibold text-foreground truncate leading-tight">
-                            {cleanName}
-                          </span>
-                          {specialty && (
-                            <span
-                              className="text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-md shrink-0"
-                              style={{
-                                backgroundColor: `${specialtyColor}20`,
-                                color: specialtyColor,
-                              }}
-                            >
-                              {specialty}
-                            </span>
-                          )}
-                        </div>
-
-                        {/* Count + percentage */}
-                        <div className="flex items-baseline gap-1.5 shrink-0">
-                          <span
-                            className="text-sm font-black tabular-nums"
-                            style={{ color: barColor }}
-                          >
-                            {entry.claims.toLocaleString()}
-                          </span>
-                          <span className="text-[10px] text-muted-foreground tabular-nums">
-                            {pct.toFixed(1)}%
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Progress bar */}
-                      <div className="ml-9 h-1.5 rounded-full bg-muted overflow-hidden">
-                        <motion.div
-                          className="h-full rounded-full"
-                          style={{ backgroundColor: barColor }}
-                          initial={{ width: 0 }}
-                          animate={{ width: `${barPct}%` }}
-                          transition={{
-                            duration: 0.6,
-                            delay: index * 0.06,
-                            ease: "easeOut",
-                          }}
-                        />
-                      </div>
-                    </motion.div>
-                  );
-                })}
-              </div>
+                    />
+                  </Bar>
+                </BarChart>
+              </ChartContainer>
             </CardContent>
           </Card>
         </motion.div>
@@ -525,27 +494,8 @@ export default function ProviderPage() {
         <div className="flex flex-col gap-4 h-full">
           <motion.div
             variants={itemVariants}
-            className="grid grid-cols-2 gap-4 flex-1"
+            className="grid grid-cols-1 gap-4 flex-1"
           >
-            <Card className="flex flex-col justify-center h-full">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Total Paid Amount
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-foreground">
-                  $
-                  {totalFromCollection.toLocaleString(undefined, {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Actual collected payments
-                </p>
-              </CardContent>
-            </Card>
             <Card className="flex flex-col justify-center h-full">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">

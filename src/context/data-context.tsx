@@ -32,11 +32,11 @@ export interface Claim {
 }
 
 export interface FilterState {
-  provider: string | null;
+  provider: string[];
   doctor: string | null;
-  insuranceType: string | null;
+  insuranceType: string[];
   cptCode: string | null;
-  month: string | null;
+  month: string[];
   dateStart: Date | null;
   dateEnd: Date | null;
 }
@@ -515,11 +515,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [claims, setClaims] = useState<Claim[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [filters, setFilters] = useState<FilterState>({
-    provider: null,
+    provider: [],
     doctor: null,
-    insuranceType: null,
+    insuranceType: [],
     cptCode: null,
-    month: null,
+    month: [],
     dateStart: null,
     dateEnd: null,
   });
@@ -660,12 +660,15 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const filteredClaims = React.useMemo(() => {
     return cleanedClaims.filter((claim) => {
-      if (filters.provider && claim.doctorName !== filters.provider)
+      if (
+        filters.provider.length > 0 &&
+        !filters.provider.includes(claim.doctorName)
+      )
         return false;
       if (filters.doctor && claim.doctorName !== filters.doctor) return false;
       if (
-        filters.insuranceType &&
-        claim.insuranceType !== filters.insuranceType
+        filters.insuranceType.length > 0 &&
+        !filters.insuranceType.includes(claim.insuranceType)
       )
         return false;
       if (filters.cptCode && !claim.cptCode.includes(filters.cptCode))
@@ -673,12 +676,12 @@ export function DataProvider({ children }: { children: ReactNode }) {
       if (filters.dateStart && claim.serviceDate < filters.dateStart)
         return false;
       if (filters.dateEnd && claim.serviceDate > filters.dateEnd) return false;
-      if (filters.month) {
+      if (filters.month.length > 0) {
         if (!claim.serviceDate) return false;
         const d = new Date(claim.serviceDate);
         if (!isNaN(d.getTime())) {
           const monthKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-          if (monthKey !== filters.month) return false;
+          if (!filters.month.includes(monthKey)) return false;
         } else {
           return false;
         }

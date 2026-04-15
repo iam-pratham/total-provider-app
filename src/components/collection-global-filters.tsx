@@ -2,15 +2,7 @@
 
 import { useData } from "@/context/data-context";
 import collectionData from "@/data/collection_data.json";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "./ui/select";
+import { MultiSelect } from "@/components/ui/multi-select";
 import { Button } from "./ui/button";
 import { useMemo } from "react";
 
@@ -100,20 +92,14 @@ export function CollectionGlobalFilters() {
     .filter(Boolean)
     .sort();
 
-  const insurances = Array.from(
-    new Set(cleanedClaims.map((c: any) => c.insuranceType as string)),
-  )
-    .filter((i) => i && i !== "Unknown Insurance")
-    .sort();
+  const providerOptions = providers.map((p) => ({ value: p, label: p }));
 
-  const handleProvider = (v: string) =>
-    setFilters((prev) => ({ ...prev, provider: v === "all" ? null : v }));
-
-  const handleInsurance = (v: string) =>
-    setFilters((prev) => ({ ...prev, insuranceType: v === "all" ? null : v }));
-
-  const handleMonth = (v: string) =>
-    setFilters((prev) => ({ ...prev, month: v === "all" ? null : v }));
+  const monthGroups = years.map((year) => ({
+    label: year,
+    options: collectionMonthKeys
+      .filter((k) => k.startsWith(year))
+      .map((k) => ({ value: k, label: formatMonthKey(k) })),
+  }));
 
   return (
     <div className="flex items-center justify-between p-4 bg-card/50 backdrop-blur-xl rounded-2xl border border-border/50 shadow-sm mb-6 transition-all duration-300 hover:border-primary/20">
@@ -125,68 +111,26 @@ export function CollectionGlobalFilters() {
         <div className="flex items-center gap-4">
           {/* Provider */}
           <div className="w-auto min-w-[150px] max-w-[250px]">
-            <Select
-              value={filters.provider || "all"}
-              onValueChange={handleProvider}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Provider" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Providers</SelectItem>
-                {providers.map((p) => (
-                  <SelectItem key={p} value={p}>
-                    {p}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Insurance */}
-          <div className="w-auto min-w-[150px] max-w-[250px]">
-            <Select
-              value={filters.insuranceType || "all"}
-              onValueChange={handleInsurance}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Insurance" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Insurances</SelectItem>
-                {insurances.map((i) => (
-                  <SelectItem key={i} value={i}>
-                    {i}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <MultiSelect
+              options={providerOptions}
+              selected={filters.provider}
+              onChange={(vals) =>
+                setFilters((prev) => ({ ...prev, provider: vals }))
+              }
+              placeholder="All Providers"
+            />
           </div>
 
           {/* Month — sourced from collection JSON, grouped by year */}
           <div className="w-auto min-w-[150px] max-w-[250px]">
-            <Select value={filters.month || "all"} onValueChange={handleMonth}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Month" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Months</SelectItem>
-                {years.map((year) => (
-                  <SelectGroup key={year}>
-                    <SelectLabel className="font-bold text-primary">
-                      {year}
-                    </SelectLabel>
-                    {collectionMonthKeys
-                      .filter((k) => k.startsWith(year))
-                      .map((k) => (
-                        <SelectItem key={k} value={k}>
-                          {formatMonthKey(k)}
-                        </SelectItem>
-                      ))}
-                  </SelectGroup>
-                ))}
-              </SelectContent>
-            </Select>
+            <MultiSelect
+              groups={monthGroups}
+              selected={filters.month}
+              onChange={(vals) =>
+                setFilters((prev) => ({ ...prev, month: vals }))
+              }
+              placeholder="All Months"
+            />
           </div>
         </div>
       </div>
@@ -196,11 +140,11 @@ export function CollectionGlobalFilters() {
         className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground hover:text-primary transition-colors h-auto py-2"
         onClick={() =>
           setFilters({
-            provider: null,
+            provider: [],
             doctor: null,
-            insuranceType: null,
+            insuranceType: [],
             cptCode: null,
-            month: null,
+            month: [],
             dateStart: null,
             dateEnd: null,
           })

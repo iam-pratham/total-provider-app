@@ -79,9 +79,9 @@ export default function CollectionPage() {
   // 1. Extract unique provider names from claims (respecting provider/doctor filter only)
   const providersFromClaims = useMemo(() => {
     let validClaims = cleanedClaims;
-    if (filters.provider)
-      validClaims = validClaims.filter(
-        (c) => c.doctorName === filters.provider,
+    if (filters.provider.length > 0)
+      validClaims = validClaims.filter((c) =>
+        filters.provider.includes(c.doctorName),
       );
     if (filters.doctor)
       validClaims = validClaims.filter((c) => c.doctorName === filters.doctor);
@@ -201,8 +201,9 @@ export default function CollectionPage() {
       const mNum = monthMap[mon];
 
       // Apply global month filter — convert JSON month to YYYY-MM for comparison
-      if (filters.month) {
-        if (rawToYYYYMM(rawMonth) !== filters.month) return;
+      if (filters.month.length > 0) {
+        const rowKey = rawToYYYYMM(rawMonth);
+        if (!rowKey || !filters.month.includes(rowKey)) return;
       }
 
       let monthlyAgg = 0;
@@ -280,8 +281,8 @@ export default function CollectionPage() {
             exit="hidden"
             className="space-y-6"
           >
-            {/* Summary Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Summary Cards — 3 cols, no Current Quarter */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <motion.div variants={itemVariants}>
                 <Card className="flex flex-col justify-center h-full">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -343,30 +344,6 @@ export default function CollectionPage() {
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
                       January – March
-                    </p>
-                  </CardContent>
-                </Card>
-              </motion.div>
-
-              <motion.div variants={itemVariants}>
-                <Card className="flex flex-col justify-center h-full">
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">
-                      Current Quarter
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold text-foreground">
-                      $
-                      {(
-                        quarterly[quarterly.length - 1]?.amount || 0
-                      ).toLocaleString(undefined, {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      })}
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {quarterly[quarterly.length - 1]?.quarter || "N/A"}
                     </p>
                   </CardContent>
                 </Card>
