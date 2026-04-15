@@ -26,7 +26,6 @@ const parseDateSafe = (dateStr: any) => {
 export function GlobalSearchModal({ isOpen, onOpenChange }: { isOpen: boolean, onOpenChange: (open: boolean) => void }) {
     const { filteredClaims } = useData()
     const [searchTerm, setSearchTerm] = React.useState("")
-    const [expandedClaimId, setExpandedClaimId] = React.useState<string | null>(null)
     const [isPending, setIsPending] = React.useState(false)
     const [modalPage, setModalPage] = React.useState(1)
     const modalRowsPerPage = 50
@@ -69,7 +68,6 @@ export function GlobalSearchModal({ isOpen, onOpenChange }: { isOpen: boolean, o
                 if (!open) {
                     onOpenChange(false)
                     setSearchTerm("")
-                    setExpandedClaimId(null)
                     setIsPending(false)
                     setTimeout(() => setModalPage(1), 300)
                 } else {
@@ -97,7 +95,6 @@ export function GlobalSearchModal({ isOpen, onOpenChange }: { isOpen: boolean, o
                                 onChange={(e) => {
                                     setSearchTerm(e.target.value);
                                     setModalPage(1);
-                                    setExpandedClaimId(null);
                                 }}
                             />
                             {isPending && (
@@ -145,8 +142,7 @@ export function GlobalSearchModal({ isOpen, onOpenChange }: { isOpen: boolean, o
                                             <motion.tr
                                                 initial={{ opacity: 0, y: 4 }}
                                                 animate={{ opacity: 1, y: 0 }}
-                                                className={`hover:bg-primary/[0.03] transition-colors border-b border-border/50 group/row cursor-pointer ${expandedClaimId === claim.id ? 'bg-primary/[0.05]' : ''}`}
-                                                onClick={() => setExpandedClaimId(expandedClaimId === claim.id ? null : claim.id)}
+                                                className="hover:bg-primary/[0.03] transition-colors border-b border-border/50 group/row"
                                             >
                                                 <TableCell className="whitespace-nowrap text-xs font-mono pl-6 py-4">
                                                     {format(parseDateSafe(claim.serviceDate), "MM/dd/yyyy")}
@@ -185,51 +181,7 @@ export function GlobalSearchModal({ isOpen, onOpenChange }: { isOpen: boolean, o
                                                     </span>
                                                 </TableCell>
                                             </motion.tr>
-                                                <AnimatePresence>
-                                                {expandedClaimId === claim.id && claim.cptDetails && claim.cptDetails.length > 0 && (
-                                                    <motion.tr
-                                                        initial={{ opacity: 0 }}
-                                                        animate={{ opacity: 1 }}
-                                                        exit={{ opacity: 0 }}
-                                                        className="bg-primary/[0.01] hover:bg-primary/[0.01]"
-                                                    >
-                                                        <TableCell colSpan={8} className="p-0 border-b border-border/50">
-                                                            <motion.div
-                                                                initial={{ height: 0, opacity: 0 }}
-                                                                animate={{ height: "auto", opacity: 1 }}
-                                                                exit={{ height: 0, opacity: 0 }}
-                                                                className="overflow-hidden"
-                                                            >
-                                                                <div className="pt-2 pb-6 px-4 md:px-8">
-                                                                    <div className="flex items-center gap-2 mb-3">
-                                                                        <div className="h-3 w-1 bg-primary rounded-full"></div>
-                                                                        <h4 className="font-bold text-xs uppercase tracking-widest text-muted-foreground">CPT Payment Breakdown</h4>
-                                                                    </div>
-                                                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                                                                        {claim.cptDetails.map((cpt: any, i: number) => (
-                                                                            <div key={i} className="bg-card border shadow-sm rounded-lg p-3 flex flex-col gap-1 hover:border-primary/30 transition-colors">
-                                                                                <div className="flex justify-between items-center w-full">
-                                                                                    <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest bg-muted/60 px-2 py-0.5 rounded border">CPT: {cpt.cpt}</span>
-                                                                                </div>
-                                                                                <div className="flex justify-between items-end mt-2">
-                                                                                    <div className="flex flex-col">
-                                                                                        <span className="text-[9px] uppercase font-bold text-muted-foreground/70">Billed</span>
-                                                                                        <span className="text-xs font-semibold text-foreground">${cpt.billed?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                                                                                    </div>
-                                                                                    <div className="flex flex-col text-right">
-                                                                                        <span className="text-[9px] uppercase font-bold text-green-600/70">Paid</span>
-                                                                                        <span className="text-xs font-bold text-green-600">${cpt.paid?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                                                                                    </div>
-                                                                                </div>
-                                                                            </div>
-                                                                        ))}
-                                                                    </div>
-                                                                </div>
-                                                            </motion.div>
-                                                        </TableCell>
-                                                    </motion.tr>
-                                                )}
-                                                </AnimatePresence>
+
                                             </React.Fragment>
                                         ))
                                     )}
