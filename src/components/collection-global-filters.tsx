@@ -71,7 +71,7 @@ export function CollectionGlobalFilters() {
       const raw = row["__EMPTY"];
       if (!raw || String(raw).toLowerCase() === "total") return;
       const key = rawToYYYYMM(String(raw));
-      if (key && !seen.has(key) && key !== "2026-04") {
+      if (key && !seen.has(key)) {
         seen.add(key);
         ordered.push(key);
       }
