@@ -146,8 +146,8 @@ function processClaimsWorkbook(workbook: XLSX.WorkBook): Claim[] {
 
     json.forEach((row, index) => {
       const claimId = String(
-        getValRobust(row, ["claim id", "claim #", "claim number"]),
-      );
+        getValRobust(row, ["claim id", "claim #", "claim number", "claim"]),
+      ).trim();
       const providerName = toTitleCase(
         String(
           getValRobust(row, [

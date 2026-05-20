@@ -109,7 +109,7 @@ export default function UploadPage() {
             }) as Record<string, unknown>[]
 
             json.forEach((row, index) => {
-                const claimId = String(getValRobust(row, ["claim id", "claim #", "claim number"]))
+                const claimId = String(getValRobust(row, ["claim id", "claim #", "claim number", "claim"])).trim()
                 const providerName = toTitleCase(String(getValRobust(row, ["service location", "location", "service provider", "provider"])).split(',')[0].trim())
                 const doctorName = toTitleCase(String(getValRobust(row, ["attending physician", "attending", "doctor", "physician"])).split(',')[0].trim())
                 const insuranceCompany = String(getValRobust(row, ["insurance company", "company", "insurance name"]))
