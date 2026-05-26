@@ -128,6 +128,7 @@ export default function UploadPage() {
 
                 let isDeni = false
                 let foundPaid = false
+                let foundPaidPatient = false
                 let foundDeductible = false
                 let foundLop = false
                 let foundPending = false
@@ -143,8 +144,9 @@ export default function UploadPage() {
                     for (const val of Object.values(row)) {
                         const strVal = String(val).toLowerCase()
                         if (strVal.includes("deni")) isDeni = true
-                        if (strVal.includes("paid with patient") || strVal.includes("paid correctly") || strVal.includes("paid with 50%")) { foundPaid = true }
-                        if (strVal.includes("towards deductible") || strVal.includes("towards ded") || strVal.includes("self pay") || strVal.includes("self-pay") || strVal.includes("selfpay") || strVal.includes("patient responsibility")) foundDeductible = true
+                        if (strVal.includes("paid with patient") || strVal.includes("paid with patient's responsibility")) { foundPaidPatient = true }
+                        if (strVal.includes("paid correctly") || strVal.includes("paid with 50%")) { foundPaid = true }
+                        if (strVal.includes("towards deductible") || strVal.includes("towards ded") || strVal.includes("towards copay") || strVal.includes("towards coinsurance") || strVal.includes("self pay") || strVal.includes("self-pay") || strVal.includes("selfpay") || strVal.includes("patient responsibility")) foundDeductible = true
                         if (strVal === "lop" || strVal.includes("lop ") || strVal.includes(" lop")) foundLop = true
                         if (strVal.includes("under arbitration") || strVal.includes("arb")) isArb = true
                         if (strVal.includes("in process") || strVal.includes("pending")) foundPending = true
@@ -153,6 +155,7 @@ export default function UploadPage() {
 
                     if (isDeni) heuristicStatus = "Denied"
                     else if (foundPaid) heuristicStatus = "Paid Correctly"
+                    else if (foundPaidPatient) heuristicStatus = "Paid With Patient's Responsibility"
                     else if (foundMaxLimit) heuristicStatus = "Reached Maximum Limit"
                     else if (foundDeductible) heuristicStatus = "Towards Deductible"
                     else if (isArb) heuristicStatus = "Under Arbitration"

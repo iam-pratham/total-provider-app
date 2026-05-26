@@ -143,8 +143,7 @@ export default function DashboardPage() {
           .trim();
         return (
           s.includes("paid correctly") ||
-          s.includes("paid with 50%") ||
-          s.includes("paid with patient")
+          s.includes("paid with 50%")
         );
       }).length,
     [filteredClaims],

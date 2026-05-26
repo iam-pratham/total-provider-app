@@ -235,6 +235,7 @@ function processClaimsWorkbook(workbook: XLSX.WorkBook): Claim[] {
 
       let isDeni = false;
       let foundPaid = false;
+      let foundPaidPatient = false;
       let foundDeductible = false;
       let foundLop = false;
       let foundPending = false;
@@ -252,13 +253,16 @@ function processClaimsWorkbook(workbook: XLSX.WorkBook): Claim[] {
           if (strVal.includes("deni")) isDeni = true;
           if (
             strVal.includes("paid with patient") ||
-            strVal.includes("paid correctly") ||
-            strVal.includes("paid with 50%")
+            strVal.includes("paid with patient's responsibility")
           )
+            foundPaidPatient = true;
+          if (strVal.includes("paid correctly") || strVal.includes("paid with 50%"))
             foundPaid = true;
           if (
             strVal.includes("towards deductible") ||
             strVal.includes("towards ded") ||
+            strVal.includes("towards copay") ||
+            strVal.includes("towards coinsurance") ||
             strVal.includes("self pay") ||
             strVal.includes("self-pay") ||
             strVal.includes("selfpay") ||
@@ -286,6 +290,7 @@ function processClaimsWorkbook(workbook: XLSX.WorkBook): Claim[] {
 
         if (isDeni) stdStatus = "Denied";
         else if (foundPaid) stdStatus = "Paid Correctly";
+        else if (foundPaidPatient) stdStatus = "Paid With Patient's Responsibility";
         else if (foundMaxLimit) stdStatus = "Reached Maximum Limit";
         else if (foundDeductible) stdStatus = "Towards Deductible";
         else if (isArb) stdStatus = "Under Arbitration";

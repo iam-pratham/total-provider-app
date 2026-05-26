@@ -260,8 +260,7 @@ export default function ProviderPage() {
       tPaid += c.paidAmt || 0;
       const isPaidStatus =
         statusStr.includes("paid correctly") ||
-        statusStr.includes("paid with 50%") ||
-        statusStr.includes("paid with patient");
+        statusStr.includes("paid with 50%");
       const isDeductible =
         statusStr.includes("towards dedcutible") ||
         statusStr.includes("towards deductible") ||

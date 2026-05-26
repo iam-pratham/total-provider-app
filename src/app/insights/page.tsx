@@ -120,7 +120,16 @@ const STATUS_THEMES: Record<
     match: (s) =>
       s.includes("towards deductible") ||
       s.includes("towards dedcutible") ||
-      s.includes("paid with patient"),
+      s.includes("towards copay") ||
+      s.includes("towards coinsurance") ||
+      s.includes("patient responsibility"),
+  },
+  "Paid With Patient's Responsibility": {
+    icon: UserCheck,
+    color: "text-teal-500",
+    match: (s) =>
+      s.includes("paid with patient") ||
+      s.includes("paid with patient's responsibility"),
   },
   "Paid With 50% Pre-Cert Penalty": {
     icon: ShieldAlert,
