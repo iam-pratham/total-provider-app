@@ -62,6 +62,9 @@ import {
   CreditCard,
   RefreshCw,
   Search,
+  ArrowUp,
+  ArrowDown,
+  ArrowUpDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -249,6 +252,25 @@ export default function ReportsPage() {
   );
   const [isPending, setIsPending] = React.useState(false);
   const modalRowsPerPage = 50;
+  const [sortConfig, setSortConfig] = React.useState<{
+    key: 'serviceDate' | 'patientName' | 'insuranceCompany' | null;
+    direction: 'asc' | 'desc' | null;
+  }>({ key: null, direction: null });
+
+  const handleSort = (key: 'serviceDate' | 'patientName' | 'insuranceCompany') => {
+    setSortConfig((prev) => {
+      if (prev.key === key) {
+        if (prev.direction === 'desc') {
+          return { key, direction: 'asc' };
+        } else if (prev.direction === 'asc') {
+          return { key: null, direction: null };
+        }
+      }
+      const defaultDir = key === 'serviceDate' ? 'desc' : 'asc';
+      return { key, direction: defaultDir };
+    });
+    setModalPage(1);
+  };
 
   React.useEffect(() => {
     if (searchTerm) {
@@ -292,10 +314,6 @@ export default function ReportsPage() {
     [bucketCounts],
   );
 
-  if (claims.length === 0) {
-    return <div className="p-6">Navigate to Upload page to load data.</div>;
-  }
-
   const otherCount = bucketCounts["Other"] ?? 0;
 
   const activeClaimsForModal = useMemo(() => {
@@ -320,8 +338,30 @@ export default function ReportsPage() {
         );
       });
     }
+    if (sortConfig.key && sortConfig.direction) {
+      list = [...list].sort((a, b) => {
+        if (sortConfig.key === 'serviceDate') {
+          const dateA = parseDateSafe(a.serviceDate).getTime();
+          const dateB = parseDateSafe(b.serviceDate).getTime();
+          return sortConfig.direction === 'asc' ? dateA - dateB : dateB - dateA;
+        } else if (sortConfig.key === 'patientName') {
+          const valA = String(a.patientName || '').toLowerCase();
+          const valB = String(b.patientName || '').toLowerCase();
+          if (valA < valB) return sortConfig.direction === 'asc' ? -1 : 1;
+          if (valA > valB) return sortConfig.direction === 'asc' ? 1 : -1;
+          return 0;
+        } else if (sortConfig.key === 'insuranceCompany') {
+          const valA = String(a.insuranceCompany || '').toLowerCase();
+          const valB = String(b.insuranceCompany || '').toLowerCase();
+          if (valA < valB) return sortConfig.direction === 'asc' ? -1 : 1;
+          if (valA > valB) return sortConfig.direction === 'asc' ? 1 : -1;
+          return 0;
+        }
+        return 0;
+      });
+    }
     return list;
-  }, [filteredClaims, selectedBucket, displayBucket, searchTerm]);
+  }, [filteredClaims, selectedBucket, displayBucket, searchTerm, sortConfig]);
 
   const paginatedModalClaims = useMemo(() => {
     return activeClaimsForModal.slice(
@@ -333,6 +373,10 @@ export default function ReportsPage() {
   const modalTotalPages = Math.ceil(
     activeClaimsForModal.length / modalRowsPerPage,
   );
+
+  if (claims.length === 0) {
+    return <div className="p-6">Navigate to Upload page to load data.</div>;
+  }
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
@@ -494,6 +538,7 @@ export default function ReportsPage() {
             setSearchTerm("");
             setExpandedClaimId(null);
             setIsPending(false);
+            setSortConfig({ key: null, direction: null });
             setTimeout(() => setModalPage(1), 300);
           }
         }}
@@ -542,14 +587,38 @@ export default function ReportsPage() {
               <Table className="relative w-full border-collapse">
                 <TableHeader className="sticky top-0 bg-background/95 backdrop-blur-md z-30 shadow-sm border-b border-border">
                   <TableRow className="hover:bg-transparent border-none">
-                    <TableHead className="w-[140px] py-4 pl-6 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-                      Service Date
+                    <TableHead 
+                      className="w-[140px] py-4 pl-6 text-[10px] font-black uppercase tracking-widest text-muted-foreground cursor-pointer select-none hover:bg-muted/50 transition-colors"
+                      onClick={() => handleSort('serviceDate')}
+                    >
+                      <div className="flex items-center gap-1">
+                        <span>Service Date</span>
+                        {sortConfig.key === "serviceDate" && sortConfig.direction === "asc" && <ArrowUp className="h-3 w-3 text-primary" />}
+                        {sortConfig.key === "serviceDate" && sortConfig.direction === "desc" && <ArrowDown className="h-3 w-3 text-primary" />}
+                        {sortConfig.key !== "serviceDate" && <ArrowUpDown className="h-3 w-3 opacity-40" />}
+                      </div>
                     </TableHead>
-                    <TableHead className="py-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-                      Patient Name
+                    <TableHead 
+                      className="py-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground cursor-pointer select-none hover:bg-muted/50 transition-colors"
+                      onClick={() => handleSort('patientName')}
+                    >
+                      <div className="flex items-center gap-1">
+                        <span>Patient Name</span>
+                        {sortConfig.key === "patientName" && sortConfig.direction === "asc" && <ArrowUp className="h-3 w-3 text-primary" />}
+                        {sortConfig.key === "patientName" && sortConfig.direction === "desc" && <ArrowDown className="h-3 w-3 text-primary" />}
+                        {sortConfig.key !== "patientName" && <ArrowUpDown className="h-3 w-3 opacity-40" />}
+                      </div>
                     </TableHead>
-                    <TableHead className="py-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-                      Insurance & Payer
+                    <TableHead 
+                      className="py-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground cursor-pointer select-none hover:bg-muted/50 transition-colors"
+                      onClick={() => handleSort('insuranceCompany')}
+                    >
+                      <div className="flex items-center gap-1">
+                        <span>Insurance & Payer</span>
+                        {sortConfig.key === "insuranceCompany" && sortConfig.direction === "asc" && <ArrowUp className="h-3 w-3 text-primary" />}
+                        {sortConfig.key === "insuranceCompany" && sortConfig.direction === "desc" && <ArrowDown className="h-3 w-3 text-primary" />}
+                        {sortConfig.key !== "insuranceCompany" && <ArrowUpDown className="h-3 w-3 opacity-40" />}
+                      </div>
                     </TableHead>
                     <TableHead className="py-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                       Attending Physician

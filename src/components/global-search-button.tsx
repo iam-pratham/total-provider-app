@@ -3,7 +3,7 @@
 import React, { useMemo, useState, useEffect } from "react"
 import { useData } from "@/context/data-context"
 import { format } from "date-fns"
-import { Search, RefreshCw } from "lucide-react"
+import { Search, RefreshCw, ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { 
@@ -30,6 +30,25 @@ export function GlobalSearchButton() {
     const [isPending, setIsPending] = useState(false)
     const [modalPage, setModalPage] = useState(1)
     const modalRowsPerPage = 50
+    const [sortConfig, setSortConfig] = useState<{
+        key: 'serviceDate' | 'patientName' | 'insuranceCompany' | null;
+        direction: 'asc' | 'desc' | null;
+    }>({ key: null, direction: null });
+
+    const handleSort = (key: 'serviceDate' | 'patientName' | 'insuranceCompany') => {
+        setSortConfig((prev) => {
+            if (prev.key === key) {
+                if (prev.direction === 'desc') {
+                    return { key, direction: 'asc' };
+                } else if (prev.direction === 'asc') {
+                    return { key: null, direction: null };
+                }
+            }
+            const defaultDir = key === 'serviceDate' ? 'desc' : 'asc';
+            return { key, direction: defaultDir };
+        });
+        setModalPage(1);
+    };
 
     useEffect(() => {
         if (searchTerm) {
@@ -53,8 +72,30 @@ export function GlobalSearchButton() {
                 return patName.includes(lower) || insName.includes(lower) || docName.includes(lower) || dos.includes(lower);
             });
         }
+        if (sortConfig.key && sortConfig.direction) {
+            list = [...list].sort((a, b) => {
+                if (sortConfig.key === 'serviceDate') {
+                    const dateA = parseDateSafe(a.serviceDate).getTime();
+                    const dateB = parseDateSafe(b.serviceDate).getTime();
+                    return sortConfig.direction === 'asc' ? dateA - dateB : dateB - dateA;
+                } else if (sortConfig.key === 'patientName') {
+                    const valA = String(a.patientName || '').toLowerCase();
+                    const valB = String(b.patientName || '').toLowerCase();
+                    if (valA < valB) return sortConfig.direction === 'asc' ? -1 : 1;
+                    if (valA > valB) return sortConfig.direction === 'asc' ? 1 : -1;
+                    return 0;
+                } else if (sortConfig.key === 'insuranceCompany') {
+                    const valA = String(a.insuranceCompany || '').toLowerCase();
+                    const valB = String(b.insuranceCompany || '').toLowerCase();
+                    if (valA < valB) return sortConfig.direction === 'asc' ? -1 : 1;
+                    if (valA > valB) return sortConfig.direction === 'asc' ? 1 : -1;
+                    return 0;
+                }
+                return 0;
+            });
+        }
         return list;
-    }, [filteredClaims, searchTerm])
+    }, [filteredClaims, searchTerm, sortConfig])
 
     const paginatedModalClaims = useMemo(() => {
         return activeClaimsForModal.slice((modalPage - 1) * modalRowsPerPage, modalPage * modalRowsPerPage)
@@ -75,6 +116,7 @@ export function GlobalSearchButton() {
                         setOpen(false)
                         setSearchTerm("")
                         setIsPending(false)
+                        setSortConfig({ key: null, direction: null })
                         setTimeout(() => setModalPage(1), 300)
                     } else {
                         setOpen(true)
@@ -121,9 +163,39 @@ export function GlobalSearchButton() {
                             <Table className="relative w-full border-collapse">
                                 <TableHeader className="sticky top-0 bg-background/95 backdrop-blur-md z-30 shadow-sm border-b border-border">
                                     <TableRow className="hover:bg-transparent border-none">
-                                        <TableHead className="w-[140px] py-4 pl-6 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Service Date</TableHead>
-                                        <TableHead className="py-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Patient Name</TableHead>
-                                        <TableHead className="py-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Insurance & Payer</TableHead>
+                                        <TableHead 
+                                            className="w-[140px] py-4 pl-6 text-[10px] font-black uppercase tracking-widest text-muted-foreground cursor-pointer select-none hover:bg-muted/50 transition-colors"
+                                            onClick={() => handleSort('serviceDate')}
+                                        >
+                                            <div className="flex items-center gap-1">
+                                                <span>Service Date</span>
+                                                {sortConfig.key === "serviceDate" && sortConfig.direction === "asc" && <ArrowUp className="h-3 w-3 text-primary" />}
+                                                {sortConfig.key === "serviceDate" && sortConfig.direction === "desc" && <ArrowDown className="h-3 w-3 text-primary" />}
+                                                {sortConfig.key !== "serviceDate" && <ArrowUpDown className="h-3 w-3 opacity-40" />}
+                                            </div>
+                                        </TableHead>
+                                        <TableHead 
+                                            className="py-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground cursor-pointer select-none hover:bg-muted/50 transition-colors"
+                                            onClick={() => handleSort('patientName')}
+                                        >
+                                            <div className="flex items-center gap-1">
+                                                <span>Patient Name</span>
+                                                {sortConfig.key === "patientName" && sortConfig.direction === "asc" && <ArrowUp className="h-3 w-3 text-primary" />}
+                                                {sortConfig.key === "patientName" && sortConfig.direction === "desc" && <ArrowDown className="h-3 w-3 text-primary" />}
+                                                {sortConfig.key !== "patientName" && <ArrowUpDown className="h-3 w-3 opacity-40" />}
+                                            </div>
+                                        </TableHead>
+                                        <TableHead 
+                                            className="py-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground cursor-pointer select-none hover:bg-muted/50 transition-colors"
+                                            onClick={() => handleSort('insuranceCompany')}
+                                        >
+                                            <div className="flex items-center gap-1">
+                                                <span>Insurance & Payer</span>
+                                                {sortConfig.key === "insuranceCompany" && sortConfig.direction === "asc" && <ArrowUp className="h-3 w-3 text-primary" />}
+                                                {sortConfig.key === "insuranceCompany" && sortConfig.direction === "desc" && <ArrowDown className="h-3 w-3 text-primary" />}
+                                                {sortConfig.key !== "insuranceCompany" && <ArrowUpDown className="h-3 w-3 opacity-40" />}
+                                            </div>
+                                        </TableHead>
                                         <TableHead className="py-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Attending Physician</TableHead>
                                         <TableHead className="py-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground">CPT Codes</TableHead>
                                         <TableHead className="py-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Billed Amount</TableHead>
