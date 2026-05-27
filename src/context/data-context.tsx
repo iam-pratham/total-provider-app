@@ -535,9 +535,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
       setIsLoading(true);
       try {
         // 1. Load claims file
-        const claimsRes = await fetch("/claims.xlsx");
-        if (!claimsRes.ok)
-          throw new Error(`claims.xlsx not found (${claimsRes.status})`);
+        const claimsRes = await fetch("/Master_File_Chiro_PT_OT_05_27_2026.xlsx");
+        if (!claimsRes.ok) {
+          throw new Error(`Master_File_Chiro_PT_OT_05_27_2026.xlsx not found (${claimsRes.status})`);
+        }
         const claimsBuffer = await claimsRes.arrayBuffer();
         const claimsWb = XLSX.read(new Uint8Array(claimsBuffer), {
           type: "array",

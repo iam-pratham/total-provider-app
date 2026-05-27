@@ -224,7 +224,7 @@ export default function DashboardPage() {
       <div className="flex flex-col items-center justify-center h-screen gap-2">
         <p className="text-lg font-bold text-foreground">No data found</p>
         <p className="text-sm text-muted-foreground">
-          Make sure claims.xlsx is placed in the public folder.
+          Make sure Master_File_Chiro_PT_OT_05_27_2026.xlsx is placed in the public folder.
         </p>
       </div>
     );
